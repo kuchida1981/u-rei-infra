@@ -25,8 +25,15 @@ u-rei.comは以下4つの独立したリポジトリ・サービスに使われ�
 
 ## Decisions
 
-### 1. DNSゾーン・レコードは新規専用GCPプロジェクトに置く
-n8n-ops・vaultwarden-hostingと同様、1リポジトリ=1専用GCPプロジェクトという既存の慣習を踏襲する。既存プロジェクトに相乗りする案も検討したが、DNSは全プロジェクト共通の関心事であり、特定サービス(n8n等)のプロジェクトに従属させると責務分離という既存パターンから外れるため採用しない。
+### 1. DNSゾーン・レコードは既存の共有GCPプロジェクトに置き、分離はWIF/SA/tfstateバケット単位で行う
+実際に確認したところ、n8n-opsとvaultwarden-hostingは「1リポジトリ=1専用GCPプロジェクト」ではなく、**同じ既存プロジェクト`kuchida-devel`を共有**していた(n8n・vaultwarden両VMとも同一プロジェクト内で稼働、`dns.googleapis.com`も既に有効化済み)。`variables.tf`の`project_id`が変数化されているのは環境ポータビリティのためであり、プロジェクトの一意性を意味するものではなかった。
+
+実際の分離単位は、リポジトリごとに作成される
+- Workload Identity Pool(`github-actions-pool-n8n`など、`attribute_condition`でリポジトリ名を限定)
+- Terraform CI用サービスアカウント(`terraform-ci-n8n`など、必要最小限のロールのみ付与)
+- tfstate用GCSバケット(`kuchida-devel-n8n-tfstate`など)
+
+の3点であり、GCPプロジェクトそのものではない。このリポジトリもこの実際の慣習に合わせ、新規GCPプロジェクトは作らず、`kuchida-devel`上に専用のWIFプール・専用サービスアカウント・専用tfstateバケットを作成する。
 
 ### 2. ゾーンと全レコードをこのリポジトリが一元所有する
 Cloud DNSの`google_dns_managed_zone`は1つのGCPプロジェクトにしか属せない。他リポジトリからレコードを追加する方式(cross-project `data "google_dns_managed_zone"` + 各リポジトリのCIにDNS権限を付与)も検討したが、以下の理由で採用しない。
@@ -43,12 +50,12 @@ NS委任はドメイン単位でしか設定できず、一部レコードだけ
 
 - [お名前.com側のネームサーバー設定変更はTerraform管理外の手動作業] → 切替前にCloud DNS側の全レコードをdigで検証し、切替後も主要レコードを再確認する手順をtasksに含める。
 - [切替の瞬間、u-rei.comを使う4サービス全てに同時に影響しうる] → 事前検証を徹底し、切替は影響の小さい時間帯に実施する。ロールバックはお名前.com側のネームサーバー設定を元(01-04.dnsv.jp)に戻すことで即座に可能。
-- [新規GCPプロジェクトの追加によりGCP課金対象が1つ増える] → Cloud DNSのゾーン費用・クエリ課金は少額(月$0.20程度+クエリ課金)であり許容範囲。
+- [`kuchida-devel`は個人用の汎用プロジェクトであり、BigQuery・Firebase・Gmail APIなどDNSと無関係な多数のサービスも同居している] → このリポジトリのTerraform CI用サービスアカウントにはCloud DNS管理に必要なロールのみを付与し、プロジェクト全体への広範な権限は付与しない(gcp-project-bootstrap capability要件)。
 - [他リポジトリのIPアドレス変更がこのリポジトリへの手動同期漏れを招く可能性] → n8n-ops/vaultwarden-hostingは静的External IPを要件化しており、変更頻度は低い。将来的に頻度が上がる場合は同期の自動化を再検討する。
 
 ## Migration Plan
 
-1. `terraform/bootstrap`でこのリポジトリ専用のGCPプロジェクトを作成し、Cloud DNS API有効化・WIF・tfstateバケットをセットアップする。
+1. `terraform/bootstrap`で既存の共有プロジェクト`kuchida-devel`上に、このリポジトリ専用のWIFプール・Terraform CI用サービスアカウント・tfstateバケットをセットアップする(プロジェクト作成・Cloud DNS API有効化は既に完了済みのため不要)。
 2. `terraform/main`でu-rei.comの`google_dns_managed_zone`と全レコード(`google_dns_record_set`)を、現行お名前.comゾーンの内容に基づき宣言する。
 3. `terraform apply`でCloud DNS側にゾーンを構築し、Googleが払い出すネームサーバーを控える。
 4. Googleのネームサーバーに対して`dig`で全レコード(apex A、www/skk CNAME、n8n/vaultwarden A、brevo DKIM CNAME、TXT、DMARC TXT)を直接問い合わせ、期待値と一致することを検証する。

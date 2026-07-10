@@ -8,7 +8,7 @@ u-rei.com ドメインのDNSレコードをTerraformで一元管理するリポ�
 ## Tech Stack
 - **IaC**: Terraform
 - **DNS Hosting**: Google Cloud DNS (`google_dns_managed_zone` / `google_dns_record_set`)
-- **Cloud Provider**: Google Cloud Platform(このリポジトリ専用のGCPプロジェクトを1つ新規作成する)
+- **Cloud Provider**: Google Cloud Platform(n8n-ops・vaultwarden-hostingと共有の既存プロジェクト`kuchida-devel`を使用。新規プロジェクトは作らない)
 - **CI/CD**: GitHub Actions (Workload Identity Federationでの鍵レス認証)
 - **State Backend**: GCS(このリポジトリ専用のtfstateバケット)
 
@@ -18,7 +18,7 @@ u-rei.com ドメインのDNSレコードをTerraformで一元管理するリポ�
 - Terraformの記法・命名規則は姉妹リポジトリ(n8n-ops, vaultwarden-hosting)に合わせる。
 
 ### Architecture Patterns
-- `terraform/bootstrap`: 専用GCPプロジェクトの初期化(必要API有効化、GitHub Actions用Workload Identity連携、Terraform CI用サービスアカウント、tfstate用GCSバケット)。n8n-ops/vaultwarden-hostingのbootstrap構成を踏襲する。
+- `terraform/bootstrap`: 既存の共有GCPプロジェクト(`kuchida-devel`)上に、このリポジトリ専用のリソース(GitHub Actions用Workload Identity連携、Terraform CI用サービスアカウント、tfstate用GCSバケット)を作成する。プロジェクト自体の作成やAPI有効化は行わない(dns.googleapis.com含め既に有効化済み)。n8n-ops/vaultwarden-hostingのbootstrap構成(リソースの粒度・命名)を踏襲する。
 - `terraform/main`: `u-rei.com`のCloud DNS管理ゾーンと、配下の全DNSレコードをTerraformリソースとして宣言する。
 
 ### DNSレコード所有のポリシー(重要な設計判断)
@@ -26,7 +26,8 @@ u-rei.com ドメインのDNSレコードをTerraformで一元管理するリポ�
 - レコードの値(IPアドレス等)が変わった場合は、当該サービス側リポジトリからこのリポジトリへ手動でtfvars更新のPRを立てる運用とする。cross-repo Terraform data source等による密結合は行わない(姉妹リポジトリがTailscale認証情報などの共有値を、remote state参照ではなく手動コピーで扱っている既存の慣習に合わせる)。
 
 ### GCPプロジェクト方針
-- n8n-ops・vaultwarden-hostingと同じく、このリポジトリ専用のGCPプロジェクトを新規に持つ(既存プロジェクトへの相乗りはしない)。
+- n8n-ops・vaultwarden-hostingと**同じ既存の共有GCPプロジェクト`kuchida-devel`を使う**。新規プロジェクトは作成しない。
+- リポジトリ間の分離はプロジェクト単位ではなく、リポジトリ専用のWorkload Identity Pool(例: `github-actions-pool-dns`)・専用のTerraform CI用サービスアカウント(例: `terraform-ci-dns`、Cloud DNS管理権限のみ)・専用のtfstate用GCSバケット(例: `kuchida-devel-dns-tfstate`)で行う。これはn8n-ops(`github-actions-pool-n8n` / `terraform-ci-n8n` / `kuchida-devel-n8n-tfstate`)・vaultwarden-hostingが実際に採用している分離パターンそのものである。
 
 ### 切替(カットオーバー)方針
 - Cloud DNS側で全レコードを構築し、Googleが払い出すネームサーバーに対して`dig`等で全サービス(n8n, vaultwarden, ブログ, skk, メール認証)が正しく解決されることを確認してから、お名前.com側のネームサーバー設定を一括で切り替える。段階的な部分切替は行わない(NS委任はドメイン単位でしか切り替えられないため)。

@@ -1,11 +1,11 @@
 ## ADDED Requirements
 
-### Requirement: 専用GCPプロジェクトの初期化
-システムは、このリポジトリ専用のGCPプロジェクトをTerraform bootstrapでプロビジョニングし、少なくともCloud DNS・IAM・IAM Credentials・Cloud Resource Manager・Storage・STSの各APIを有効化しなければならない(SHALL)。
+### Requirement: 既存の共有GCPプロジェクトの再利用
+システムは、n8n-ops・vaultwarden-hostingと共有の既存GCPプロジェクト(`kuchida-devel`)上にリソースをプロビジョニングしなければならない(SHALL)。このリポジトリのために新規GCPプロジェクトを作成してはならない(SHALL NOT)。Terraform bootstrapは、少なくともCloud DNS・IAM・IAM Credentials・Cloud Resource Manager・Storage・STSの各APIが有効であることを保証しなければならない(SHALL)。
 
-#### Scenario: bootstrapのterraform applyでAPIが有効化される
+#### Scenario: bootstrapのterraform applyで既存プロジェクトにリソースが作成される
 - **WHEN** `terraform/bootstrap`で`terraform apply`を実行する
-- **THEN** 対象GCPプロジェクトでCloud DNS APIを含む必要なAPIが有効化される
+- **THEN** 新規プロジェクトは作成されず、既存の`kuchida-devel`プロジェクト内にこのリポジトリ専用のリソースが作成され、Cloud DNS APIを含む必要なAPIが有効な状態になる
 
 ### Requirement: 鍵レスなGitHub Actions認証
 システムは、GitHub ActionsからGCPへの認証をこのリポジトリに限定したWorkload Identity Federation経由で行い、長期有効なサービスアカウントキーを発行してはならない(SHALL NOT)。
@@ -15,7 +15,7 @@
 - **THEN** `attribute_condition`によりリポジトリ名が一致しないため拒否される
 
 ### Requirement: Terraform state用の専用GCSバケット
-システムは、`terraform/main`のTerraform stateを、このプロジェクト専用のバージョニング有効かつ非公開のGCSバケットに保存しなければならない(SHALL)。
+システムは、`terraform/main`のTerraform stateを、このリポジトリ専用のバージョニング有効かつ非公開のGCSバケットに保存しなければならない(SHALL)。他リポジトリのtfstateバケット(`kuchida-devel-n8n-tfstate`等)と共用してはならない(SHALL NOT)。
 
 #### Scenario: tfstateバケットが非公開かつバージョニング有効
 - **WHEN** tfstate用GCSバケットの設定を確認する
