@@ -41,4 +41,4 @@
 - [x] 5.1 [Claude] `openspec/project.md`に確定したWIFプール名・サービスアカウント名・tfstateバケット名など運用情報を追記する
 - [x] 5.2 [Claude] README.mdに運用手順(レコード追加方法、他リポジトリからの更新依頼フロー)を記載する
 - [x] 5.3 [Claude] CIワークフロー(PR時terraform plan、マージ時terraform apply)を姉妹リポジトリ(n8n-ops, vaultwarden-hosting)に合わせて作成する
-- [ ] 5.4 [ユーザー] GitHubリポジトリのSecrets(`GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_SERVICE_ACCOUNT_EMAIL`, `TF_STATE_BUCKET`, `GCP_PROJECT_ID`)とproduction環境の必須レビュアー設定をリポジトリ管理画面で登録する
+- [x] 5.4 [ユーザー] GitHubリポジトリのSecrets(`GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_SERVICE_ACCOUNT_EMAIL`, `TF_STATE_BUCKET`, `GCP_PROJECT_ID`)とproduction環境の必須レビュアー設定をリポジトリ管理画面で登録する(`gh secret set`とSettings > Environmentsで実施。`gh api repos/kuchida1981/u-rei.com-dns/environments`で`production`環境・`required_reviewers`(kuchida1981)を確認済み)
