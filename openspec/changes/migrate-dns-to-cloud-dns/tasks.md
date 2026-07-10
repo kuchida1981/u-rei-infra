@@ -8,7 +8,7 @@
 - [x] 1.2 [Claude] GitHub Actions用Workload Identity Pool/Provider(`github-actions-pool-dns`等)を、このリポジトリの`attribute_condition`に限定して定義する
 - [x] 1.3 [Claude] Terraform CI用サービスアカウント(`terraform-ci-dns`等)を作成し、Cloud DNS管理ロールとtfstateバケットへの`storage.objectAdmin`のみを付与する
 - [x] 1.4 [Claude] tfstate用GCSバケット(`kuchida-devel-dns-tfstate`等、バージョニング有効・`public_access_prevention: enforced`)を定義する
-- [ ] 1.5 [ユーザー] `terraform/bootstrap`をローカルで`terraform apply`し、出力(CI用サービスアカウント、WIFプロバイダ、tfstateバケット名)を記録する。姉妹リポジトリと同じく、プロジェクト権限が必要なbootstrapのみ手動apply、`terraform/main`はCI経由にする方針
+- [x] 1.5 [ユーザー] `terraform/bootstrap`をローカルで`terraform apply`し、出力(CI用サービスアカウント、WIFプロバイダ、tfstateバケット名)を記録する。姉妹リポジトリと同じく、プロジェクト権限が必要なbootstrapのみ手動apply、`terraform/main`はCI経由にする方針(実施メモ: 初回applyは`gcloud auth application-default login`未実施でADCの認証が古い/不足しており403エラーで失敗。ログイン後に再applyして成功)
 
 ## 2. Cloud DNSゾーン・レコードの定義(terraform/main、[Claude]がコード作成)
 
