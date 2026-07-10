@@ -34,14 +34,48 @@ cross-repo Terraform state参照などの密結合は行わない。値の変更
 
 ## セットアップ手順(初回のみ)
 
-1. `terraform/bootstrap`をローカルで`terraform init && terraform apply`する(要`kuchida-devel`プロジェクトへの権限)
-2. `terraform/bootstrap`の出力(`workload_identity_provider`, `terraform_ci_service_account_email`, `state_bucket`)を、GitHubリポジトリのSecretsに登録する:
-   - `GCP_WORKLOAD_IDENTITY_PROVIDER`
-   - `GCP_SERVICE_ACCOUNT_EMAIL`
-   - `TF_STATE_BUCKET`
-   - `GCP_PROJECT_ID` (`kuchida-devel`)
-3. リポジトリのSettings > Environmentsで`production`環境を作成し、必須レビュアーを設定する(`terraform-apply.yml`の手動承認ゲート)
-4. `terraform/main`の変更をPRで出し、Terraform Planを確認してからマージする
+### 0. 前提
+
+- `kuchida-devel`プロジェクトへのGCP権限があること(n8n-ops・vaultwarden-hostingと共有)
+- ローカルに`gcloud` CLIと`terraform`(>=1.6)がインストール済みで、対象アカウントで認証済みであること
+
+### 1. Bootstrap(手動・最初の1回だけ)
+
+`terraform/main`はGCSのリモートバックエンドとWorkload Identity Federation経由のGitHub Actions認証を前提にしているが、そのバケットとWIF Pool自体は「これから作る側」なので、ローカルから一度だけ手動で作成する。
+
+```bash
+cd terraform/bootstrap
+terraform init
+terraform apply \
+  -var="project_id=kuchida-devel" \
+  -var="github_repo=kuchida1981/u-rei.com-dns"
+```
+
+apply完了後、以下のoutputを控える(次のGitHub Secrets登録で使う):
+
+```bash
+terraform output
+# state_bucket
+# workload_identity_provider
+# terraform_ci_service_account_email
+```
+
+### 2. GitHub Secrets登録
+
+`terraform/bootstrap`の出力を、GitHubリポジトリのSecretsに登録する:
+
+- `GCP_WORKLOAD_IDENTITY_PROVIDER` ← `workload_identity_provider`
+- `GCP_SERVICE_ACCOUNT_EMAIL` ← `terraform_ci_service_account_email`
+- `TF_STATE_BUCKET` ← `state_bucket`
+- `GCP_PROJECT_ID` ← `kuchida-devel`
+
+### 3. Production環境の承認ゲート設定
+
+リポジトリのSettings > Environmentsで`production`環境を作成し、必須レビュアーを設定する(`terraform-apply.yml`の手動承認ゲート)。
+
+### 4. terraform/mainの初回apply
+
+`terraform/main`の変更をPRで出し、Terraform Planを確認してからマージする。マージ後、`production`環境の承認を経てCIが自動的に`terraform apply`する。
 
 ## カットオーバー手順
 
