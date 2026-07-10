@@ -24,7 +24,7 @@
 
 ## 3. 検証(切替前)
 
-- [ ] 3.1 [Claude/ユーザー] PRを立てCI(`terraform-plan.yml`)でレコード内容をレビューする(姉妹リポジトリと同じくPRコメントでplanを確認)
+- [x] 3.1 [Claude/ユーザー] PRを立てCI(`terraform-plan.yml`)でレコード内容をレビューする(姉妹リポジトリと同じくPRコメントでplanを確認)(実施メモ: PR #1作成、CI planは10 to add・0 to change・0 to destroy。9レコード+ゾーン1件の値をお名前.comエクスポート原本と突合し完全一致を確認)
 - [ ] 3.2 [ユーザー] PRをmainにマージし、CI(`terraform-apply.yml`、production環境の手動承認ゲート付き)でCloud DNS側にゾーンを構築、払い出されたネームサーバー4つを控える
 - [ ] 3.3 [Claude] `dig @<Googleのネームサーバー>`で全レコード(apex A、www/skk CNAME、n8n/vaultwarden A、brevo DKIM CNAME、TXT、DMARC TXT)を問い合わせ、現行お名前.comゾーンの値と一致することを確認する
 
