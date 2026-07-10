@@ -27,7 +27,13 @@ u-rei.com ドメインのDNSレコードをTerraformで一元管理するリポ�
 
 ### GCPプロジェクト方針
 - n8n-ops・vaultwarden-hostingと**同じ既存の共有GCPプロジェクト`kuchida-devel`を使う**。新規プロジェクトは作成しない。
-- リポジトリ間の分離はプロジェクト単位ではなく、リポジトリ専用のWorkload Identity Pool(例: `github-actions-pool-dns`)・専用のTerraform CI用サービスアカウント(例: `terraform-ci-dns`、Cloud DNS管理権限のみ)・専用のtfstate用GCSバケット(例: `kuchida-devel-dns-tfstate`)で行う。これはn8n-ops(`github-actions-pool-n8n` / `terraform-ci-n8n` / `kuchida-devel-n8n-tfstate`)・vaultwarden-hostingが実際に採用している分離パターンそのものである。
+- リポジトリ間の分離はプロジェクト単位ではなく、リポジトリ専用のWorkload Identity Pool・専用のTerraform CI用サービスアカウント(Cloud DNS管理権限のみ)・専用のtfstate用GCSバケットで行う。これはn8n-ops(`github-actions-pool-n8n` / `terraform-ci-n8n` / `kuchida-devel-n8n-tfstate`)・vaultwarden-hostingが実際に採用している分離パターンそのものである。
+
+#### 確定リソース名(terraform/bootstrap実装済み)
+- Workload Identity Pool: `github-actions-pool-dns`
+- Terraform CI用サービスアカウント: `terraform-ci-dns@kuchida-devel.iam.gserviceaccount.com`(付与ロール: `roles/dns.admin`, tfstateバケットへの`roles/storage.objectAdmin`)
+- tfstate用GCSバケット: `kuchida-devel-dns-tfstate`
+- Cloud DNS管理ゾーン名: `u-rei-com`(dns_name: `u-rei.com.`)
 
 ### 切替(カットオーバー)方針
 - Cloud DNS側で全レコードを構築し、Googleが払い出すネームサーバーに対して`dig`等で全サービス(n8n, vaultwarden, ブログ, skk, メール認証)が正しく解決されることを確認してから、お名前.com側のネームサーバー設定を一括で切り替える。段階的な部分切替は行わない(NS委任はドメイン単位でしか切り替えられないため)。

@@ -1,1 +1,48 @@
 # u-rei.com-dns
+
+`u-rei.com`のDNSレコードをTerraformで一元管理するリポジトリ。ドメインの登録(レジストラ)はお名前.comに残したまま、権威DNSサーバー(ネームサーバー)の委任先をGoogle Cloud DNSに変更し、レコード管理をIaC化する。
+
+設計の背景・判断は`openspec/project.md`と`openspec/changes/migrate-dns-to-cloud-dns/design.md`を参照。
+
+## 構成
+
+```
+terraform/bootstrap/  既存の共有GCPプロジェクト(kuchida-devel)上に、このリポジトリ専用の
+                       WIFプール・Terraform CI用サービスアカウント・tfstateバケットを作成する。
+                       プロジェクト権限が必要なため、ローカルから手動で一度だけapplyする。
+terraform/main/        u-rei.comのCloud DNS管理ゾーンと全レコードを宣言する。
+                       CI経由(PRでplan、masterマージでproduction環境の承認を経てapply)で運用する。
+```
+
+## レコード所有のポリシー
+
+このリポジトリが`u-rei.com`ゾーンと**全レコードを一元所有**する。`u-rei.com`を使う他リポジトリ(n8n-ops, vaultwarden-hosting, web-skk, kuchida1981.github.io)のTerraform/CIはDNSに一切関与しない。
+
+## 他リポジトリからレコード値の更新を依頼する場合
+
+n8n-opsやvaultwarden-hostingのVM再作成でExternal IPが変わった場合など、レコード値の変更が必要になったら:
+
+1. このリポジトリで`terraform/main/variables.tf`の該当する変数(`n8n_ip`, `vaultwarden_ip`など)を新しい値に更新するPRを立てる
+2. PR上のTerraform Plan結果を確認する
+3. `master`にマージすると、production環境の承認を経てCIが自動的に`terraform apply`する
+
+cross-repo Terraform state参照などの密結合は行わない。値の変更は必ずこのリポジトリへの手動PRで行う。
+
+## 新しいレコードを追加する場合
+
+`terraform/main/dns.tf`に`google_dns_record_set`リソースを追加し、値が繰り返し使われる場合は`variables.tf`に変数として切り出す。
+
+## セットアップ手順(初回のみ)
+
+1. `terraform/bootstrap`をローカルで`terraform init && terraform apply`する(要`kuchida-devel`プロジェクトへの権限)
+2. `terraform/bootstrap`の出力(`workload_identity_provider`, `terraform_ci_service_account_email`, `state_bucket`)を、GitHubリポジトリのSecretsに登録する:
+   - `GCP_WORKLOAD_IDENTITY_PROVIDER`
+   - `GCP_SERVICE_ACCOUNT_EMAIL`
+   - `TF_STATE_BUCKET`
+   - `GCP_PROJECT_ID` (`kuchida-devel`)
+3. リポジトリのSettings > Environmentsで`production`環境を作成し、必須レビュアーを設定する(`terraform-apply.yml`の手動承認ゲート)
+4. `terraform/main`の変更をPRで出し、Terraform Planを確認してからマージする
+
+## カットオーバー手順
+
+`openspec/changes/migrate-dns-to-cloud-dns/tasks.md`のセクション3・4を参照。Cloud DNS側で全レコードを構築・検証してから、お名前.com側のネームサーバー設定を一括で切り替える。
