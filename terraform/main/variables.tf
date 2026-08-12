@@ -68,6 +68,12 @@ variable "brevo_domain_verification_txt" {
   default     = "brevo-code:1c77d23b76bfea2ca29505578fd48451"
 }
 
+variable "google_site_verification_txt" {
+  description = "Google Search Console domain-ownership verification TXT value (unquoted; the record wraps it in quotes)."
+  type        = string
+  default     = "google-site-verification=UmwniuLxzXNe_7flLXrKamuWWef3He9GzGSpQk7n0LU"
+}
+
 variable "dmarc_record" {
   description = "DMARC policy TXT value for _dmarc.u-rei.com (unquoted; the record wraps it in quotes)."
   type        = string

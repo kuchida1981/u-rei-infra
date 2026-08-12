@@ -84,7 +84,10 @@ resource "google_dns_record_set" "apex_txt" {
   name         = google_dns_managed_zone.u_rei_com.dns_name
   type         = "TXT"
   ttl          = var.record_ttl
-  rrdatas      = ["\"${var.brevo_domain_verification_txt}\""]
+  rrdatas = [
+    "\"${var.brevo_domain_verification_txt}\"",
+    "\"${var.google_site_verification_txt}\"",
+  ]
 }
 
 resource "google_dns_record_set" "dmarc_txt" {
