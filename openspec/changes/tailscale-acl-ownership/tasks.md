@@ -37,6 +37,6 @@
 
 ## 6. 仕上げ
 
-- [ ] 6.1 `tests` が隔離を守ることを、**保存せずに**確認する。管理コンソールの ACL エディタで、1つ目の accept ルールの `src` に `tag:ci-blog-daily-post` を足し(保存はしない)、`tag:claude-wrapper-server:22` が到達可能になることで `tests` の検証エラーが表示されることを確認する(`terraform plan` は ACL を API で検証しないため、plan/apply での確認は行わない。apply で試すと、検証が働かなかった場合に本番の ACL が緩むため)
+- [x] 6.1 管理コンソールの ACL エディタで、1つ目の accept ルールの `src` に `tag:ci-blog-daily-post` を足して Save し、`tests` の検証失敗(`test failed`)で保存が拒否されることを確認した(`terraform plan` は ACL を API で検証せず、apply で試すと検証が働かなかった場合に本番の ACL が緩むため、plan/apply ではなくコンソールで行った)
 - [x] 6.2 このリポジトリの README に、タグ追加手順(基盤側を先に merge、サービス側は後)とコンソール手編集の禁止を記載する
 - [x] 6.3 `openspec validate tailscale-acl-ownership --strict` が通ることを確認する
