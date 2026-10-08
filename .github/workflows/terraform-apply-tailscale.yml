@@ -1,0 +1,48 @@
+name: Terraform Apply (tailscale)
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "terraform/tailscale/**"
+      - ".github/workflows/terraform-apply-tailscale.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+# Never run two applies against the tailnet policy at once: the ACL is a
+# single whole-file resource, so interleaved applies would clobber each other.
+concurrency:
+  group: terraform-apply-tailscale
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    # Same "production" Environment (required reviewers) as terraform-apply.yml:
+    # a bad ACL cuts every service off the tailnet, so a human approves each apply.
+    environment: production
+    defaults:
+      run:
+        working-directory: terraform/tailscale
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+
+      - name: Terraform Apply
+        env:
+          TF_VAR_tailscale_tailnet: ${{ secrets.TAILSCALE_TAILNET }}
+          TF_VAR_tailscale_oauth_client_id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          TF_VAR_tailscale_oauth_client_secret: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
+        run: terraform apply -no-color -auto-approve

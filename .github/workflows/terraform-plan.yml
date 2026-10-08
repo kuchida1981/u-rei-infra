@@ -69,3 +69,63 @@ jobs:
               repo: context.repo.repo,
               body,
             });
+
+  # Separate job (not a matrix entry on "plan" above) so the required status
+  # check name "plan" does not change. Same always-complete no-op pattern.
+  plan-tailscale:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/tailscale
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check for relevant changes
+        id: changes
+        working-directory: ${{ github.workspace }}
+        run: |
+          if git diff --quiet "origin/${{ github.event.pull_request.base.ref }}...HEAD" -- terraform/tailscale .github/workflows/terraform-plan.yml; then
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - id: auth
+        if: steps.changes.outputs.relevant == 'true'
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+
+      - if: steps.changes.outputs.relevant == 'true'
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        if: steps.changes.outputs.relevant == 'true'
+        run: terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+
+      - name: Terraform Plan
+        if: steps.changes.outputs.relevant == 'true'
+        env:
+          TF_VAR_tailscale_tailnet: ${{ secrets.TAILSCALE_TAILNET }}
+          TF_VAR_tailscale_oauth_client_id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          TF_VAR_tailscale_oauth_client_secret: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
+        run: terraform plan -no-color -out=tfplan | tee plan.txt
+
+      - name: Comment plan on PR
+        if: steps.changes.outputs.relevant == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('terraform/tailscale/plan.txt', 'utf8');
+            const maxLen = 60000;
+            const body = `### Terraform Plan (tailscale)\n\n<details><summary>Show plan</summary>\n\n\`\`\`\n${plan.slice(0, maxLen)}\n\`\`\`\n\n</details>`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
