@@ -12,7 +12,7 @@
 - [x] 2.3 ローカルのクローンの remote とディレクトリ名を更新し、`git fetch` が成功することを確認する
 - [x] 2.4 `terraform-plan.yml` を手動実行(またはダミー PR)し、WIF 認証が通ることを確認する
 - [ ] 2.5 `github_repo` の既定値を新名称にし、旧名を外して bootstrap を再 apply する。旧名では認証できなくなったことを確認する
-- [ ] 2.6 README と `openspec/specs/*` の Purpose 内の旧リポジトリ名の記述を更新し、`grep -r "u-rei.com-dns"` で残りが意図したものだけであることを確認する
+- [x] 2.6 README と `openspec/specs/*` の Purpose 内の旧リポジトリ名の記述を更新し、`grep -r "u-rei.com-dns"` で残りが意図したものだけであることを確認する
 
 ## 3. Tailscale 構成の追加(import 先行)
 
@@ -38,5 +38,5 @@
 ## 6. 仕上げ
 
 - [ ] 6.1 ACL の `tests` を破る変更(例: `tag:ci-blog-daily-post` を広い src に追加)をテスト用ブランチで plan/apply し、検証エラーで拒否されることを確認する(apply は通さない)
-- [ ] 6.2 このリポジトリの README に、タグ追加手順(基盤側を先に merge、サービス側は後)とコンソール手編集の禁止を記載する
+- [x] 6.2 このリポジトリの README に、タグ追加手順(基盤側を先に merge、サービス側は後)とコンソール手編集の禁止を記載する
 - [ ] 6.3 `openspec validate tailscale-acl-ownership --strict` が通ることを確認する

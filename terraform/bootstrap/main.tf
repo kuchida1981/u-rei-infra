@@ -37,7 +37,7 @@ resource "google_storage_bucket" "tfstate" {
 resource "google_iam_workload_identity_pool" "github" {
   project                   = var.project_id
   workload_identity_pool_id = "github-actions-pool-dns"
-  display_name              = "GitHub Actions (u-rei.com-dns)"
+  display_name              = "GitHub Actions (u-rei-infra)"
 
   depends_on = [google_project_service.required]
 }
@@ -54,10 +54,7 @@ resource "google_iam_workload_identity_pool_provider" "github" {
   }
 
   # Only this exact repository may mint tokens through this provider.
-  # TEMPORARY (tailscale-acl-ownership): the renamed repository is also
-  # allowed so the GitHub rename does not break CI mid-flight. Drop the
-  # `github_repo_renamed` half once the rename is done (task 2.5).
-  attribute_condition = "assertion.repository in [\"${var.github_repo}\", \"${var.github_repo_renamed}\"]"
+  attribute_condition = "assertion.repository == \"${var.github_repo}\""
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
@@ -68,21 +65,13 @@ resource "google_iam_workload_identity_pool_provider" "github" {
 resource "google_service_account" "terraform_ci" {
   project      = var.project_id
   account_id   = "terraform-ci-dns"
-  display_name = "Terraform CI for u-rei.com-dns (GitHub Actions)"
+  display_name = "Terraform CI for u-rei-infra (GitHub Actions)"
 }
 
 resource "google_service_account_iam_member" "wif_binding" {
   service_account_id = google_service_account.terraform_ci.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository/${var.github_repo}"
-}
-
-# TEMPORARY (tailscale-acl-ownership): binding for the renamed repository.
-# Removed in task 2.5 together with `github_repo_renamed`.
-resource "google_service_account_iam_member" "wif_binding_renamed" {
-  service_account_id = google_service_account.terraform_ci.name
-  role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository/${var.github_repo_renamed}"
 }
 
 resource "google_storage_bucket_iam_member" "terraform_ci_state_access" {
@@ -99,4 +88,17 @@ resource "google_project_iam_member" "terraform_ci_dns_admin" {
   project = var.project_id
   role    = "roles/dns.admin"
   member  = "serviceAccount:${google_service_account.terraform_ci.email}"
+}
+
+# The temporary binding for the renamed repository (tailscale-acl-ownership)
+# is now the permanent `wif_binding` above, which points at the very same IAM
+# member. Forget the temporary resource WITHOUT destroying it: destroying it
+# would delete the binding `wif_binding` has just (re)created and lock CI out.
+# Safe to delete this block once it has been applied.
+removed {
+  from = google_service_account_iam_member.wif_binding_renamed
+
+  lifecycle {
+    destroy = false
+  }
 }

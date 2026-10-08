@@ -12,11 +12,5 @@ variable "region" {
 variable "github_repo" {
   description = "GitHub repository allowed to assume the Terraform CI service account, in \"owner/repo\" form."
   type        = string
-  default     = "kuchida1981/u-rei.com-dns"
-}
-
-variable "github_repo_renamed" {
-  description = "TEMPORARY (tailscale-acl-ownership): the repository's new name, allowed alongside github_repo during the GitHub rename. Becomes the new github_repo default in task 2.5."
-  type        = string
   default     = "kuchida1981/u-rei-infra"
 }
