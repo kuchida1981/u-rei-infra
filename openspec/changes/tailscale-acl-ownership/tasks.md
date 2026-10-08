@@ -27,12 +27,12 @@
 - [x] 4.1 vaultwarden-ops の `terraform/main` は既に `required_version = ">= 1.7.0"` だったため、引き上げは不要。`terraform validate` が通ることを確認した
 - [x] 4.2 `terraform/modules/tailscale/main.tf` から `tailscale_acl` を削除し、同ファイル内に `removed { from = tailscale_acl.this  lifecycle { destroy = false } }` を置いた(モジュール内に置く形が使えた)。PR の plan が "will no longer be managed ... will not be destroyed"、`0 to destroy` であることを確認した
 - [x] 4.3 PR を merge して apply を承認し、完了後に管理コンソールの ACL が変化していないこと、このリポジトリの `terraform plan` が差分なしであることを確認する
-- [ ] 4.4 vaultwarden-ops の `tailscale.tf` 内のコメントと README(OAuth スコープ、タグ追加手順)を「ACL は基盤リポジトリが所有する」という内容に更新する
+- [x] 4.4 vaultwarden-ops の `tailscale.tf` 内のコメントと README(OAuth スコープ、タグ追加手順)を「ACL は基盤リポジトリが所有する」という内容に更新する
 
 ## 5. OAuth クライアントの権限分離
 
-- [ ] 5.1 Auth Keys(write) のみ、タグを `tag:vaultwarden-server` に限定した OAuth クライアントを発行し、vaultwarden-ops の Secrets を差し替える。`terraform plan` が認証エラーなく通ることを確認する
-- [ ] 5.2 同様に `tag:n8n-server` 用のクライアントを発行し、n8n-ops の Secrets を差し替える。`terraform plan` が認証エラーなく通ることを確認する
+- [x] 5.1 Auth Keys(write) のみ、タグを `tag:vaultwarden-server` に限定した OAuth クライアントを発行し、vaultwarden-ops の Secrets を差し替える。`terraform plan` が認証エラーなく通ることを確認する
+- [x] 5.2 同様に `tag:n8n-server` 用のクライアントを発行し、n8n-ops の Secrets を差し替える。`terraform plan` が認証エラーなく通ることを確認する
 - [ ] 5.3 旧 OAuth クライアント(Policy File スコープ付き)を管理コンソールで失効させ、vaultwarden-ops / n8n-ops の CI が引き続き成功することを確認する
 
 ## 6. 仕上げ
