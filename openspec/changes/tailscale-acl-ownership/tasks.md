@@ -1,15 +1,15 @@
 ## 1. 事前確認
 
 - [ ] 1.1 新リポジトリ名を確定する(既定案 `u-rei-infra`)。ユーザーの承認を得たことを会話で確認する
-- [ ] 1.2 `terraform/bootstrap/terraform.tfstate` が最新であることを `terraform -chdir=terraform/bootstrap plan` で確認する(差分なし、または既知の差分のみ)
-- [ ] 1.3 vaultwarden-ops の保留中の apply を洗い出し、移行完了までは承認しないことを確認する(GitHub Actions の待機中ジョブ一覧)
-- [ ] 1.4 現行の ACL を Tailscale 管理コンソールまたは API から JSON で取得し、vaultwarden-ops の `tailscale_acl` の内容と一致することを確認する(差分なし)
+- [x] 1.2 `terraform/bootstrap/terraform.tfstate` が最新であることを `terraform -chdir=terraform/bootstrap plan` で確認する(差分なし、または既知の差分のみ)
+- [x] 1.3 vaultwarden-ops の保留中の apply を洗い出し、移行完了までは承認しないことを確認する(GitHub Actions の待機中ジョブ一覧)
+- [x] 1.4 現行の ACL を Tailscale 管理コンソールまたは API から JSON で取得し、vaultwarden-ops の `tailscale_acl` の内容と一致することを確認する(差分なし)
 
 ## 2. WIF の二重許可とリポジトリのリネーム
 
-- [ ] 2.1 `terraform/bootstrap` の `attribute_condition` と `principalSet` を新旧両名を許可する形に変更し、`terraform apply` が成功することを確認する
-- [ ] 2.2 GitHub 上でリポジトリをリネームする。旧 URL が新 URL へリダイレクトされることを `git ls-remote` で確認する
-- [ ] 2.3 ローカルのクローンの remote とディレクトリ名を更新し、`git fetch` が成功することを確認する
+- [x] 2.1 `terraform/bootstrap` の `attribute_condition` と `principalSet` を新旧両名を許可する形に変更し、`terraform apply` が成功することを確認する
+- [x] 2.2 GitHub 上でリポジトリをリネームする。旧 URL が新 URL へリダイレクトされることを `git ls-remote` で確認する
+- [x] 2.3 ローカルのクローンの remote とディレクトリ名を更新し、`git fetch` が成功することを確認する
 - [ ] 2.4 `terraform-plan.yml` を手動実行(またはダミー PR)し、WIF 認証が通ることを確認する
 - [ ] 2.5 `github_repo` の既定値を新名称にし、旧名を外して bootstrap を再 apply する。旧名では認証できなくなったことを確認する
 - [ ] 2.6 README と `openspec/specs/*` の Purpose 内の旧リポジトリ名の記述を更新し、`grep -r "u-rei.com-dns"` で残りが意図したものだけであることを確認する

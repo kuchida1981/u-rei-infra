@@ -54,7 +54,10 @@ resource "google_iam_workload_identity_pool_provider" "github" {
   }
 
   # Only this exact repository may mint tokens through this provider.
-  attribute_condition = "assertion.repository == \"${var.github_repo}\""
+  # TEMPORARY (tailscale-acl-ownership): the renamed repository is also
+  # allowed so the GitHub rename does not break CI mid-flight. Drop the
+  # `github_repo_renamed` half once the rename is done (task 2.5).
+  attribute_condition = "assertion.repository in [\"${var.github_repo}\", \"${var.github_repo_renamed}\"]"
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
@@ -72,6 +75,14 @@ resource "google_service_account_iam_member" "wif_binding" {
   service_account_id = google_service_account.terraform_ci.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository/${var.github_repo}"
+}
+
+# TEMPORARY (tailscale-acl-ownership): binding for the renamed repository.
+# Removed in task 2.5 together with `github_repo_renamed`.
+resource "google_service_account_iam_member" "wif_binding_renamed" {
+  service_account_id = google_service_account.terraform_ci.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository/${var.github_repo_renamed}"
 }
 
 resource "google_storage_bucket_iam_member" "terraform_ci_state_access" {
