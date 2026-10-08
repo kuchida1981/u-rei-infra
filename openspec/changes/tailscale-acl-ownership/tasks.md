@@ -24,9 +24,9 @@
 
 ## 4. vaultwarden-ops 側の除去
 
-- [ ] 4.1 vaultwarden-ops で Terraform の `required_version` を `>= 1.7` に引き上げる(`removed` ブロックを使うため)。`terraform init` が通ることを確認する
-- [ ] 4.2 `terraform/modules/tailscale/main.tf` から `tailscale_acl` を削除し、`removed { from = module.tailscale.tailscale_acl.this  lifecycle { destroy = false } }` を追加する。`terraform plan` で destroy ではなく "will no longer be managed" と表示されることを確認する(表示されない場合は `terraform state rm` による手動除去に切り替える)
-- [ ] 4.3 PR を merge して apply を承認し、完了後に管理コンソールの ACL が変化していないこと、このリポジトリの `terraform plan` が差分なしであることを確認する
+- [x] 4.1 vaultwarden-ops の `terraform/main` は既に `required_version = ">= 1.7.0"` だったため、引き上げは不要。`terraform validate` が通ることを確認した
+- [x] 4.2 `terraform/modules/tailscale/main.tf` から `tailscale_acl` を削除し、同ファイル内に `removed { from = tailscale_acl.this  lifecycle { destroy = false } }` を置いた(モジュール内に置く形が使えた)。PR の plan が "will no longer be managed ... will not be destroyed"、`0 to destroy` であることを確認した
+- [x] 4.3 PR を merge して apply を承認し、完了後に管理コンソールの ACL が変化していないこと、このリポジトリの `terraform plan` が差分なしであることを確認する
 - [ ] 4.4 vaultwarden-ops の `tailscale.tf` 内のコメントと README(OAuth スコープ、タグ追加手順)を「ACL は基盤リポジトリが所有する」という内容に更新する
 
 ## 5. OAuth クライアントの権限分離
