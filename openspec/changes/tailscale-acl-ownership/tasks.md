@@ -20,7 +20,7 @@
 - [x] 3.2 `terraform/tailscale` を追加する(provider、GCS バックエンド prefix `tailscale/main`、vaultwarden-ops の現行 ACL をそのままコピーした `tailscale_acl`、`import` ブロック)。`terraform validate` が通ることを確認する
 - [x] 3.3 `terraform-plan.yml` と `terraform-apply.yml` を `terraform/tailscale` に対応させ(paths、Tailscale 用の環境変数)、承認ゲート付きであることを確認する
 - [x] 3.4 ローカルまたは CI で `terraform plan` を実行し、"1 to import, 0 to add, 0 to change, 0 to destroy" となることを確認する(差分があれば apply せず 1.4 に戻る)
-- [ ] 3.5 PR を merge して apply を承認し、完了後に再度 `terraform plan` が差分なしであること、管理コンソールの ACL が変化していないことを確認する
+- [x] 3.5 PR を merge して apply を承認し、完了後に再度 `terraform plan` が差分なしであること、管理コンソールの ACL が変化していないことを確認する
 
 ## 4. vaultwarden-ops 側の除去
 

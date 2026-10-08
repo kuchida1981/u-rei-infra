@@ -1,12 +1,3 @@
-# Adopt the live tailnet policy, previously owned by vaultwarden-ops, into this
-# state. Import first, release it from vaultwarden-ops afterwards (see
-# openspec/changes/tailscale-acl-ownership/design.md, Decision 2).
-# TEMPORARY: delete this block once the import has been applied (task 3.5).
-import {
-  to = tailscale_acl.this
-  id = "acl"
-}
-
 # WARNING: `tailscale_acl` manages the tailnet's *entire* ACL policy file as a
 # single resource - the Tailscale API has no partial-update endpoint, so
 # whichever Terraform state applies this resource last wins and overwrites the
