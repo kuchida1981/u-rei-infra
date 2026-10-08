@@ -33,7 +33,7 @@
 
 - [x] 5.1 Auth Keys(write) のみ、タグを `tag:vaultwarden-server` に限定した OAuth クライアントを発行し、vaultwarden-ops の Secrets を差し替える。`terraform plan` が認証エラーなく通ることを確認する
 - [x] 5.2 同様に `tag:n8n-server` 用のクライアントを発行し、n8n-ops の Secrets を差し替える。`terraform plan` が認証エラーなく通ることを確認する
-- [ ] 5.3 旧 OAuth クライアント(Policy File スコープ付き)を管理コンソールで失効させ、vaultwarden-ops / n8n-ops の CI が引き続き成功することを確認する
+- [x] 5.3 旧 OAuth クライアント(Policy File スコープ付き)を管理コンソールで失効させ、vaultwarden-ops / n8n-ops の CI が引き続き成功することを確認する
 
 ## 6. 仕上げ
 
