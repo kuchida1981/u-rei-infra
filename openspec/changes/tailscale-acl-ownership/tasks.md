@@ -10,7 +10,7 @@
 - [x] 2.1 `terraform/bootstrap` の `attribute_condition` と `principalSet` を新旧両名を許可する形に変更し、`terraform apply` が成功することを確認する
 - [x] 2.2 GitHub 上でリポジトリをリネームする。旧 URL が新 URL へリダイレクトされることを `git ls-remote` で確認する
 - [x] 2.3 ローカルのクローンの remote とディレクトリ名を更新し、`git fetch` が成功することを確認する
-- [ ] 2.4 `terraform-plan.yml` を手動実行(またはダミー PR)し、WIF 認証が通ることを確認する
+- [x] 2.4 `terraform-plan.yml` を手動実行(またはダミー PR)し、WIF 認証が通ることを確認する
 - [ ] 2.5 `github_repo` の既定値を新名称にし、旧名を外して bootstrap を再 apply する。旧名では認証できなくなったことを確認する
 - [ ] 2.6 README と `openspec/specs/*` の Purpose 内の旧リポジトリ名の記述を更新し、`grep -r "u-rei.com-dns"` で残りが意図したものだけであることを確認する
 
@@ -19,7 +19,7 @@
 - [x] 3.1 Tailscale 管理コンソールで Policy File(write) のみの OAuth クライアントを新規発行し、このリポジトリの GitHub Secrets(`TAILSCALE_OAUTH_CLIENT_ID` / `TAILSCALE_OAUTH_CLIENT_SECRET` / `TAILSCALE_TAILNET`)に登録する。Secrets が一覧に表示されることを確認する
 - [x] 3.2 `terraform/tailscale` を追加する(provider、GCS バックエンド prefix `tailscale/main`、vaultwarden-ops の現行 ACL をそのままコピーした `tailscale_acl`、`import` ブロック)。`terraform validate` が通ることを確認する
 - [x] 3.3 `terraform-plan.yml` と `terraform-apply.yml` を `terraform/tailscale` に対応させ(paths、Tailscale 用の環境変数)、承認ゲート付きであることを確認する
-- [ ] 3.4 ローカルまたは CI で `terraform plan` を実行し、"1 to import, 0 to add, 0 to change, 0 to destroy" となることを確認する(差分があれば apply せず 1.4 に戻る)
+- [x] 3.4 ローカルまたは CI で `terraform plan` を実行し、"1 to import, 0 to add, 0 to change, 0 to destroy" となることを確認する(差分があれば apply せず 1.4 に戻る)
 - [ ] 3.5 PR を merge して apply を承認し、完了後に再度 `terraform plan` が差分なしであること、管理コンソールの ACL が変化していないことを確認する
 
 ## 4. vaultwarden-ops 側の除去
