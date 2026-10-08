@@ -1,6 +1,6 @@
 ## 1. 事前確認
 
-- [ ] 1.1 新リポジトリ名を確定する(既定案 `u-rei-infra`)。ユーザーの承認を得たことを会話で確認する
+- [x] 1.1 新リポジトリ名を確定する(既定案 `u-rei-infra`)。ユーザーの承認を得たことを会話で確認する
 - [x] 1.2 `terraform/bootstrap/terraform.tfstate` が最新であることを `terraform -chdir=terraform/bootstrap plan` で確認する(差分なし、または既知の差分のみ)
 - [x] 1.3 vaultwarden-ops の保留中の apply を洗い出し、移行完了までは承認しないことを確認する(GitHub Actions の待機中ジョブ一覧)
 - [x] 1.4 現行の ACL を Tailscale 管理コンソールまたは API から JSON で取得し、vaultwarden-ops の `tailscale_acl` の内容と一致することを確認する(差分なし)
@@ -11,7 +11,7 @@
 - [x] 2.2 GitHub 上でリポジトリをリネームする。旧 URL が新 URL へリダイレクトされることを `git ls-remote` で確認する
 - [x] 2.3 ローカルのクローンの remote とディレクトリ名を更新し、`git fetch` が成功することを確認する
 - [x] 2.4 `terraform-plan.yml` を手動実行(またはダミー PR)し、WIF 認証が通ることを確認する
-- [ ] 2.5 `github_repo` の既定値を新名称にし、旧名を外して bootstrap を再 apply する。旧名では認証できなくなったことを確認する
+- [x] 2.5 `github_repo` の既定値を新名称にし、旧名を外して bootstrap を再 apply する。旧名では認証できなくなったことを確認する
 - [x] 2.6 README と `openspec/specs/*` の Purpose 内の旧リポジトリ名の記述を更新し、`grep -r "u-rei.com-dns"` で残りが意図したものだけであることを確認する
 
 ## 3. Tailscale 構成の追加(import 先行)
@@ -37,6 +37,6 @@
 
 ## 6. 仕上げ
 
-- [ ] 6.1 ACL の `tests` を破る変更(例: `tag:ci-blog-daily-post` を広い src に追加)をテスト用ブランチで plan/apply し、検証エラーで拒否されることを確認する(apply は通さない)
+- [ ] 6.1 `tests` が隔離を守ることを、**保存せずに**確認する。管理コンソールの ACL エディタで、1つ目の accept ルールの `src` に `tag:ci-blog-daily-post` を足し(保存はしない)、`tag:claude-wrapper-server:22` が到達可能になることで `tests` の検証エラーが表示されることを確認する(`terraform plan` は ACL を API で検証しないため、plan/apply での確認は行わない。apply で試すと、検証が働かなかった場合に本番の ACL が緩むため)
 - [x] 6.2 このリポジトリの README に、タグ追加手順(基盤側を先に merge、サービス側は後)とコンソール手編集の禁止を記載する
-- [ ] 6.3 `openspec validate tailscale-acl-ownership --strict` が通ることを確認する
+- [x] 6.3 `openspec validate tailscale-acl-ownership --strict` が通ることを確認する
