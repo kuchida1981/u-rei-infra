@@ -42,11 +42,12 @@ u-rei.com ドメインのDNSレコードをTerraformで一元管理するリポ�
 - `terraform plan`によるレビューと、切替前の`dig @<google-nameserver>`による全レコードの解決確認を検証手段とする。
 
 ## Domain Context
-`u-rei.com`は以下4つの独立したリポジトリ・サービスに使われる共有ドメイン:
+`u-rei.com`は以下5つの独立したリポジトリ・サービスに使われる共有ドメイン:
 - **n8n-ops**: `n8n.u-rei.com` → GCE VM (n8nワークフロー自動化)
 - **vaultwarden-hosting**: `vaultwarden.u-rei.com` → GCE VM (Vaultwarden)
 - **kuchida1981.github.io**: apex(`u-rei.com`)・`www.u-rei.com` → GitHub Pages(個人ブログ)
 - **web-skk**: `skk.u-rei.com` → GitHub Pages(Project Pages、CNAME先はkuchida1981.github.io)
+- **u-rei.com-contents**: `contents.u-rei.com` → GitHub Pages(Project Pages、CNAME先はkuchida1981.github.io)
 - メール送信認証(Brevo経由のDKIM/DMARC)はn8nのワークフローからのメール送信に対応する
 
 ## Important Constraints
