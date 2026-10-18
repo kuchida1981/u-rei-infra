@@ -1,5 +1,5 @@
-# u-rei.com is a shared domain across four independent repos (n8n-ops,
-# vaultwarden-hosting, kuchida1981.github.io, web-skk). This repo is the
+# u-rei.com is a shared domain across five independent repos (n8n-ops,
+# vaultwarden-hosting, kuchida1981.github.io, web-skk, u-rei.com-contents). This repo is the
 # sole owner of the zone and every record below - see
 # openspec/project.md's "DNSレコード所有のポリシー" for why cross-repo
 # Terraform coupling was deliberately avoided in favor of this central
@@ -40,6 +40,18 @@ resource "google_dns_record_set" "skk_cname" {
   ttl          = var.record_ttl
   rrdatas      = [var.github_pages_cname]
 }
+
+# contents.u-rei.com serves u-rei.com-contents GitHub Pages site, hosting
+# multi-project static sub-contents (e.g. /matt-cardona-vs-nick-gage-ja-subs/).
+resource "google_dns_record_set" "contents_cname" {
+  project      = var.project_id
+  managed_zone = google_dns_managed_zone.u_rei_com.name
+  name         = "contents.${google_dns_managed_zone.u_rei_com.dns_name}"
+  type         = "CNAME"
+  ttl          = var.record_ttl
+  rrdatas      = [var.github_pages_cname]
+}
+
 
 resource "google_dns_record_set" "n8n_a" {
   project      = var.project_id
