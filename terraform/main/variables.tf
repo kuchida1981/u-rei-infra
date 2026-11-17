@@ -21,6 +21,12 @@ variable "record_ttl" {
   default     = 3600
 }
 
+variable "vaultwarden_record_ttl" {
+  description = "TTL (seconds) for the vaultwarden A record only. Kept short so the record can be cut over quickly when the VM's static IP changes (e.g. region migration); other records keep record_ttl."
+  type        = number
+  default     = 60
+}
+
 variable "github_pages_ips" {
   description = "GitHub Pages' well-known IPv4 addresses backing the apex A record (kuchida1981.github.io user site)."
   type        = list(string)
