@@ -47,7 +47,7 @@ variable "n8n_ip" {
 variable "vaultwarden_ip" {
   description = "vaultwarden-hosting's static external IP. Source of truth is vaultwarden-hosting; update here via a manual PR if it ever changes."
   type        = string
-  default     = "34.84.31.142"
+  default     = "136.87.117.100"
 }
 
 variable "brevo_dkim1_target" {
