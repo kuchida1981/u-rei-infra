@@ -67,7 +67,7 @@ resource "google_dns_record_set" "vaultwarden_a" {
   managed_zone = google_dns_managed_zone.u_rei_com.name
   name         = "vaultwarden.${google_dns_managed_zone.u_rei_com.dns_name}"
   type         = "A"
-  ttl          = var.record_ttl
+  ttl          = var.vaultwarden_record_ttl
   rrdatas      = [var.vaultwarden_ip]
 }
 
